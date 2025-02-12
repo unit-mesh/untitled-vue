@@ -1,0 +1,14 @@
+---
+interaction: ReplaceCurrentFile
+batchFileRegex: "**/*.vue"
+codeOnly: true
+---
+
+将如下的 Vue 2 + Element UI 组件代码，复刻到 Vue 3 + Ant Design Vue 组件代码
+
+1. 状态管理：如果原来的代码使用 Vuex 状态管理，请转换为 Pinia 状态管理器，如果没有用到管理状态就不要用 Pinia；
+2. 功能复刻：不要求实现一样，但是输入参数必须一致。
+
+${all}
+
+请使用 Vue 代码块返回，方便我直接使用。
