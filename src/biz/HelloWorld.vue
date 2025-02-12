@@ -14,8 +14,9 @@
 
     <!-- 主内容区域 -->
     <div class="content">
-      <h1 class="title">Hello, World!</h1>
-      <p class="description">这是一个丰富的 Hello World 示例页面。</p>
+      <MdInput type="text" v-model="hello" placeholder="请输入内容" />
+
+      <MarkdownEditor v-model="hello" />
     </div>
 
     <!-- 返回顶部按钮 -->
@@ -29,10 +30,14 @@ import PanThumb from '../components/PanThumb/index.vue';
 // import ThemePicker from '../components/ThemePicker/index.vue';
 import Screenfull from '../components/Screenfull/index.vue';
 import BackToTop from '../components/BackToTop/index.vue';
+import MdInput from '../components/MDinput/index.vue'
+import MarkdownEditor from '../components/MarkdownEditor/index.vue'
 
 export default {
   name: 'HelloWorld',
   components: {
+    MarkdownEditor,
+    MdInput,
     Hamburger,
     PanThumb,
     // ThemePicker,

@@ -209,7 +209,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-/*// Fonts:*/
+@use "sass:math";
+
 $font-size-base: 16px;
 $font-size-small: 18px;
 $font-size-smallest: 12px;
@@ -271,7 +272,7 @@ $color-black: black;
   }
   .material-input {
     font-size: $font-size-base;
-    padding: $spacer $spacer $spacer - $apixel * 10 $spacer / 2;
+    padding: $spacer $spacer $spacer - $apixel * 10 math.div($spacer, 2);
     display: block;
     width: 100%;
     border: none;
