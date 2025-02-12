@@ -21,6 +21,8 @@
 
     <ErrorLog />
 
+    <dropzone />
+
     <!-- 返回顶部按钮 -->
     <BackToTop class="back-to-top" v-show="true" />
   </div>
@@ -29,12 +31,12 @@
 <script>
 import Hamburger from '../components/Hamburger/index.vue';
 import PanThumb from '../components/PanThumb/index.vue';
-// import ThemePicker from '../components/ThemePicker/index.vue';
 import Screenfull from '../components/Screenfull/index.vue';
 import BackToTop from '../components/BackToTop/index.vue';
 import MdInput from '../components/MDinput/index.vue'
 import MarkdownEditor from '../components/MarkdownEditor/index.vue'
 import ErrorLog from '../components/ErrorLog/index.vue'
+import Dropzone from '../components/Dropzone/index.vue'
 
 export default {
   name: 'HelloWorld',
@@ -47,6 +49,7 @@ export default {
     Screenfull,
     BackToTop,
     ErrorLog,
+    Dropzone,
   },
   methods: {
     toggleSideBar() {
