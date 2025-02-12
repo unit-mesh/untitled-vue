@@ -4,8 +4,8 @@
       {{ headerText }}
     </div>
     <draggable
-      :list="list"
       v-bind="$attrs"
+      :list="list"
       class="board-column-content"
       :set-data="setData"
     >
@@ -22,35 +22,36 @@ import draggable from 'vuedraggable'
 export default {
   name: 'DragKanbanDemo',
   components: {
-    draggable
+    draggable,
   },
   props: {
     headerText: {
       type: String,
-      default: 'Header'
+      default: 'Header',
     },
     options: {
       type: Object,
       default() {
         return {}
-      }
+      },
     },
     list: {
       type: Array,
       default() {
         return []
-      }
-    }
+      },
+    },
   },
   methods: {
     setData(dataTransfer) {
       // to avoid Firefox bug
       // Detail see : https://github.com/RubaXa/Sortable/issues/1012
       dataTransfer.setData('Text', '')
-    }
-  }
+    },
+  },
 }
 </script>
+
 <style lang="scss" scoped>
 .board-column {
   min-width: 300px;
@@ -59,7 +60,6 @@ export default {
   overflow: hidden;
   background: #f0f0f0;
   border-radius: 3px;
-
   .board-column-header {
     height: 50px;
     line-height: 50px;
@@ -96,4 +96,3 @@ export default {
   }
 }
 </style>
-

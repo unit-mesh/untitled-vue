@@ -1,24 +1,40 @@
 <template>
   <div class="dndList">
-    <div :style="{width:width1}" class="dndList-list">
+    <div :style="{ width: width1 }" class="dndList-list">
       <h3>{{ list1Title }}</h3>
-      <draggable :set-data="setData" :list="list1" group="article" class="dragArea">
-        <div v-for="element in list1" :key="element.id" class="list-complete-item">
+      <draggable
+        :set-data="setData"
+        :list="list1"
+        group="article"
+        class="dragArea"
+      >
+        <div
+          v-for="element in list1"
+          :key="element.id"
+          class="list-complete-item"
+        >
           <div class="list-complete-item-handle">
             {{ element.id }}[{{ element.author }}] {{ element.title }}
           </div>
-          <div style="position:absolute;right:0px;">
-            <span style="float: right ;margin-top: -20px;margin-right:5px;" @click="deleteEle(element)">
-              <i style="color:#ff4949" class="el-icon-delete" />
+          <div style="position: absolute; right: 0px">
+            <span
+              style="float: right; margin-top: -20px; margin-right: 5px"
+              @click="deleteEle(element)"
+            >
+              <el-icon style="color: #ff4949"><el-icon-delete /></el-icon>
             </span>
           </div>
         </div>
       </draggable>
     </div>
-    <div :style="{width:width2}" class="dndList-list">
+    <div :style="{ width: width2 }" class="dndList-list">
       <h3>{{ list2Title }}</h3>
       <draggable :list="list2" group="article" class="dragArea">
-        <div v-for="element in list2" :key="element.id" class="list-complete-item">
+        <div
+          v-for="element in list2"
+          :key="element.id"
+          class="list-complete-item"
+        >
           <div class="list-complete-item-handle2" @click="pushEle(element)">
             {{ element.id }} [{{ element.author }}] {{ element.title }}
           </div>
@@ -29,47 +45,51 @@
 </template>
 
 <script>
+import { Delete as ElIconDelete } from '@element-plus/icons'
 import draggable from 'vuedraggable'
 
 export default {
+  components: {
+    draggable,
+    ElIconDelete,
+  },
   name: 'DndList',
-  components: { draggable },
   props: {
     list1: {
       type: Array,
       default() {
         return []
-      }
+      },
     },
     list2: {
       type: Array,
       default() {
         return []
-      }
+      },
     },
     list1Title: {
       type: String,
-      default: 'list1'
+      default: 'list1',
     },
     list2Title: {
       type: String,
-      default: 'list2'
+      default: 'list2',
     },
     width1: {
       type: String,
-      default: '48%'
+      default: '48%',
     },
     width2: {
       type: String,
-      default: '48%'
-    }
+      default: '48%',
+    },
   },
   methods: {
     isNotInList1(v) {
-      return this.list1.every(k => v.id !== k.id)
+      return this.list1.every((k) => v.id !== k.id)
     },
     isNotInList2(v) {
-      return this.list2.every(k => v.id !== k.id)
+      return this.list2.every((k) => v.id !== k.id)
     },
     deleteEle(ele) {
       for (const item of this.list1) {
@@ -99,8 +119,8 @@ export default {
       // to avoid Firefox bug
       // Detail see : https://github.com/RubaXa/Sortable/issues/1012
       dataTransfer.setData('Text', '')
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -109,7 +129,7 @@ export default {
   background: #fff;
   padding-bottom: 40px;
   &:after {
-    content: "";
+    content: '';
     display: table;
     clear: both;
   }
@@ -126,7 +146,6 @@ export default {
     }
   }
 }
-
 .list-complete-item {
   cursor: pointer;
   position: relative;
@@ -136,29 +155,24 @@ export default {
   border: 1px solid #bfcbd9;
   transition: all 1s;
 }
-
 .list-complete-item-handle {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-right: 50px;
 }
-
 .list-complete-item-handle2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-right: 20px;
 }
-
 .list-complete-item.sortable-chosen {
-  background: #4AB7BD;
+  background: #4ab7bd;
 }
-
 .list-complete-item.sortable-ghost {
-  background: #30B08F;
+  background: #30b08f;
 }
-
 .list-complete-enter,
 .list-complete-leave-active {
   opacity: 0;

@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { $on, $off, $once, $emit } from '../utils/gogocodeTransfer'
 import CodeMirror from 'codemirror'
 import 'codemirror/addon/lint/lint.css'
 import 'codemirror/lib/codemirror.css'
@@ -20,7 +21,7 @@ export default {
   props: ['value'],
   data() {
     return {
-      jsonEditor: false
+      jsonEditor: false,
     }
   },
   watch: {
@@ -29,7 +30,7 @@ export default {
       if (value !== editorValue) {
         this.jsonEditor.setValue(JSON.stringify(this.value, null, 2))
       }
-    }
+    },
   },
   mounted() {
     this.jsonEditor = CodeMirror.fromTextArea(this.$refs.textarea, {
@@ -37,20 +38,21 @@ export default {
       mode: 'application/json',
       gutters: ['CodeMirror-lint-markers'],
       theme: 'rubyblue',
-      lint: true
+      lint: true,
     })
 
     this.jsonEditor.setValue(JSON.stringify(this.value, null, 2))
-    this.jsonEditor.on('change', cm => {
-      this.$emit('changed', cm.getValue())
-      this.$emit('input', cm.getValue())
+    this.jsonEditor.on('change', (cm) => {
+      $emit(this, 'changed', cm.getValue())
+      $emit(this, 'update:value', cm.getValue())
     })
   },
   methods: {
     getValue() {
       return this.jsonEditor.getValue()
-    }
-  }
+    },
+  },
+  emits: ['changed', 'update:value'],
 }
 </script>
 
@@ -58,7 +60,6 @@ export default {
 .json-editor {
   height: 100%;
   position: relative;
-
   ::v-deep {
     .CodeMirror {
       height: auto;
@@ -70,7 +71,7 @@ export default {
     }
 
     .cm-s-rubyblue span.cm-string {
-      color: #F08047;
+      color: #f08047;
     }
   }
 }
