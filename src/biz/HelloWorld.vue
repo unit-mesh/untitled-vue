@@ -19,6 +19,8 @@
       <MarkdownEditor v-model="hello" />
     </div>
 
+    <ErrorLog />
+
     <!-- 返回顶部按钮 -->
     <BackToTop class="back-to-top" v-show="true" />
   </div>
@@ -32,6 +34,7 @@ import Screenfull from '../components/Screenfull/index.vue';
 import BackToTop from '../components/BackToTop/index.vue';
 import MdInput from '../components/MDinput/index.vue'
 import MarkdownEditor from '../components/MarkdownEditor/index.vue'
+import ErrorLog from '../components/ErrorLog/index.vue'
 
 export default {
   name: 'HelloWorld',
@@ -43,6 +46,7 @@ export default {
     // ThemePicker,
     Screenfull,
     BackToTop,
+    ErrorLog,
   },
   methods: {
     toggleSideBar() {

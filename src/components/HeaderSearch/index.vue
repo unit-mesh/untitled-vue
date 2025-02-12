@@ -31,9 +31,13 @@
 // make search results more in line with expectations
 import Fuse from 'fuse.js'
 import path from 'path'
+import SvgIcon from '../SvgIcon/index.vue'
 
 export default {
   name: 'HeaderSearch',
+  components: {
+    SvgIcon,
+  },
   data() {
     return {
       search: '',

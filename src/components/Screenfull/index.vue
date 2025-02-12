@@ -9,9 +9,13 @@
 
 <script>
 import screenfull from 'screenfull'
+import SvgIcon from '../SvgIcon/index.vue'
 
 export default {
   name: 'Screenfull',
+  components: {
+    SvgIcon,
+  },
   data() {
     return {
       isFullscreen: false,

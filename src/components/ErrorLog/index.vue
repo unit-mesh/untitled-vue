@@ -64,7 +64,19 @@
 
 <script>
 import { Delete as ElIconDelete } from '@element-plus/icons'
+import { ElTable, ElTableColumn, ElButton, ElDialog, ElTag, ElBadge } from 'element-plus'
+import SvgIcon from '../SvgIcon/index.vue'
+
 export default {
+  components: {
+    SvgIcon,
+    ElTable,
+    ElTableColumn,
+    ElButton,
+    ElDialog,
+    ElTag,
+    ElBadge,
+  },
   data() {
     return {
       dialogTableVisible: false,
@@ -74,7 +86,7 @@ export default {
   name: 'ErrorLog',
   computed: {
     errorLogs() {
-      return this.$store.getters.errorLogs
+      return this.$store.getters.errorLogs || []
     },
   },
   methods: {
