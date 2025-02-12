@@ -2,68 +2,59 @@
   <div class="dndList">
     <div :style="{ width: width1 }" class="dndList-list">
       <h3>{{ list1Title }}</h3>
-      <draggable
-        :set-data="setData"
-        :list="list1"
-        group="article"
-        class="dragArea"
-      >
-        <div
-          v-for="element in list1"
-          :key="element.id"
-          class="list-complete-item"
-        >
-          <div class="list-complete-item-handle">
-            {{ element.id }}[{{ element.author }}] {{ element.title }}
-          </div>
-          <div style="position: absolute; right: 0px">
-            <span
-              style="float: right; margin-top: -20px; margin-right: 5px"
-              @click="deleteEle(element)"
-            >
-              <el-icon style="color: #ff4949"><el-icon-delete /></el-icon>
-            </span>
-          </div>
-        </div>
-      </draggable>
+      <a-list item-layout="horizontal" :data-source="list1">
+        <template #renderItem="{ item }">
+          <a-list-item>
+            <a-list-item-meta>
+              <template #title>
+                {{ item.id }} [{{ item.author }}] {{ item.title }}
+              </template>
+            </a-list-item-meta>
+            <template #actions>
+              <a @click="deleteEle(item)">
+                <a-icon type="delete" style="color: #ff4949"/>
+              </a>
+            </template>
+          </a-list-item>
+        </template>
+      </a-list>
     </div>
     <div :style="{ width: width2 }" class="dndList-list">
       <h3>{{ list2Title }}</h3>
-      <draggable :list="list2" group="article" class="dragArea">
-        <div
-          v-for="element in list2"
-          :key="element.id"
-          class="list-complete-item"
-        >
-          <div class="list-complete-item-handle2" @click="pushEle(element)">
-            {{ element.id }} [{{ element.author }}] {{ element.title }}
-          </div>
-        </div>
-      </draggable>
+      <a-list item-layout="horizontal" :data-source="list2">
+        <template #renderItem="{ item }">
+          <a-list-item @click="pushEle(item)">
+            <a-list-item-meta :title="`${item.id} [${item.author}] ${item.title}`"/>
+          </a-list-item>
+        </template>
+      </a-list>
     </div>
   </div>
 </template>
 
 <script>
-import { Delete as ElIconDelete } from '@element-plus/icons'
-import draggable from 'vuedraggable'
+import { defineComponent } from 'vue'
+import { List } from 'ant-design-vue'
+import Icon from '@ant-design/icons-vue'
 
-export default {
+export default defineComponent({
   components: {
-    draggable,
-    ElIconDelete,
+    AList: List,
+    AListItem: List.Item,
+    AListItemMeta: List.Item.Meta,
+    AIcon: Icon,
   },
   name: 'DndList',
   props: {
     list1: {
       type: Array,
-      default() {
+      default () {
         return []
       },
     },
     list2: {
       type: Array,
-      default() {
+      default () {
         return []
       },
     },
@@ -85,13 +76,13 @@ export default {
     },
   },
   methods: {
-    isNotInList1(v) {
+    isNotInList1 (v) {
       return this.list1.every((k) => v.id !== k.id)
     },
-    isNotInList2(v) {
+    isNotInList2 (v) {
       return this.list2.every((k) => v.id !== k.id)
     },
-    deleteEle(ele) {
+    deleteEle (ele) {
       for (const item of this.list1) {
         if (item.id === ele.id) {
           const index = this.list1.indexOf(item)
@@ -103,7 +94,7 @@ export default {
         this.list2.unshift(ele)
       }
     },
-    pushEle(ele) {
+    pushEle (ele) {
       for (const item of this.list2) {
         if (item.id === ele.id) {
           const index = this.list2.indexOf(item)
@@ -115,30 +106,29 @@ export default {
         this.list1.push(ele)
       }
     },
-    setData(dataTransfer) {
-      // to avoid Firefox bug
-      // Detail see : https://github.com/RubaXa/Sortable/issues/1012
-      dataTransfer.setData('Text', '')
-    },
   },
-}
+})
 </script>
 
 <style lang="scss" scoped>
 .dndList {
   background: #fff;
   padding-bottom: 40px;
+
   &:after {
     content: '';
     display: table;
     clear: both;
   }
+
   .dndList-list {
     float: left;
     padding-bottom: 30px;
+
     &:first-of-type {
       margin-right: 2%;
     }
+
     .dragArea {
       margin-top: 15px;
       min-height: 50px;
@@ -146,6 +136,7 @@ export default {
     }
   }
 }
+
 .list-complete-item {
   cursor: pointer;
   position: relative;
@@ -155,24 +146,29 @@ export default {
   border: 1px solid #bfcbd9;
   transition: all 1s;
 }
+
 .list-complete-item-handle {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-right: 50px;
 }
+
 .list-complete-item-handle2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-right: 20px;
 }
+
 .list-complete-item.sortable-chosen {
   background: #4ab7bd;
 }
+
 .list-complete-item.sortable-ghost {
   background: #30b08f;
 }
+
 .list-complete-enter,
 .list-complete-leave-active {
   opacity: 0;

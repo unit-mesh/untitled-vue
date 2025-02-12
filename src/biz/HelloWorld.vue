@@ -14,14 +14,24 @@
 
     <!-- 主内容区域 -->
     <div class="content">
+      <dnd-list
+        :list1="list1"
+        :list2="list2"
+        :list1Title="list1Title"
+        :list2Title="list2Title"
+        :width1="width1"
+        :width2="width2">
+
+      </dnd-list>
+
+      <drag-select value="hello">
+        <div class="title">Hello World</div>
+      </drag-select>
+
       <MdInput type="text" v-model="hello" placeholder="请输入内容" />
 
       <MarkdownEditor v-model="hello" />
     </div>
-
-    <ErrorLog />
-
-    <dropzone />
 
     <!-- 返回顶部按钮 -->
     <BackToTop class="back-to-top" v-show="true" />
@@ -37,10 +47,13 @@ import MdInput from '../components/MDinput/index.vue'
 import MarkdownEditor from '../components/MarkdownEditor/index.vue'
 import ErrorLog from '../components/ErrorLog/index.vue'
 import Dropzone from '../components/Dropzone/index.vue'
+import DragSelect from '../components/DragSelect/index.vue'
+import DndList from '../components/DndList/index.vue'
 
 export default {
   name: 'HelloWorld',
   components: {
+    DndList,
     MarkdownEditor,
     MdInput,
     Hamburger,
@@ -50,6 +63,7 @@ export default {
     BackToTop,
     ErrorLog,
     Dropzone,
+    DragSelect,
   },
   methods: {
     toggleSideBar() {

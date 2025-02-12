@@ -1,75 +1,86 @@
 <template>
-  <el-select
-    v-bind="$attrs"
-    ref="dragSelect"
-    v-model="selectVal"
-    class="drag-select"
-    multiple
+  <a-select
+      ref="dragSelect"
+      v-model:value="selectVal"
+      v-bind="$attrs"
+      class="drag-select"
+      mode="multiple"
+      @change="handleChange"
   >
-    <slot />
-  </el-select>
+    <slot/>
+  </a-select>
 </template>
 
 <script>
-import { $on, $off, $once, $emit } from '../utils/gogocodeTransfer'
+import { ref, computed, onMounted } from 'vue'
 import Sortable from 'sortablejs'
+import { Select } from 'ant-design-vue'
 
 export default {
+  components: {
+    ASelect: Select
+  },
   name: 'DragSelect',
   props: {
     value: {
       type: Array,
-      required: true,
-    },
-  },
-  computed: {
-    selectVal: {
-      get() {
-        return [...this.value]
-      },
-      set(val) {
-        $emit(this, 'update:value', [...val])
-      },
-    },
-  },
-  mounted() {
-    this.setSort()
-  },
-  methods: {
-    setSort() {
-      const el = this.$refs.dragSelect.$el.querySelectorAll(
-        '.el-select__tags > span'
-      )[0]
-      this.sortable = Sortable.create(el, {
-        ghostClass: 'sortable-ghost', // Class name for the drop placeholder,
-        setData: function (dataTransfer) {
-          dataTransfer.setData('Text', '')
-          // to avoid Firefox bug
-          // Detail see : https://github.com/RubaXa/Sortable/issues/1012
-        },
-        onEnd: (evt) => {
-          const targetRow = this.value.splice(evt.oldIndex, 1)[0]
-          this.value.splice(evt.newIndex, 0, targetRow)
-        },
-      })
-    },
+      required: true
+    }
   },
   emits: ['update:value'],
+  setup (props, { emit }) {
+    const dragSelectRef = ref(null)
+
+    const selectVal = computed({
+      get () {
+        return [...props.value]
+      },
+      set (val) {
+        emit('update:value', [...val])
+      }
+    })
+
+    const handleChange = (value) => {
+      selectVal.value = value
+    }
+
+    const setSort = () => {
+      console.log(dragSelectRef)
+      const el = dragSelectRef.value.$el.querySelectorAll('.ant-select-selection-overflow')[0]
+      Sortable.create(el, {
+        ghostClass: 'sortable-ghost',
+        setData: function (dataTransfer) {
+          dataTransfer.setData('Text', '')
+        },
+        onEnd: (evt) => {
+          const targetRow = selectVal.value.splice(evt.oldIndex, 1)[0]
+          selectVal.value.splice(evt.newIndex, 0, targetRow)
+          emit('update:value', [...selectVal.value])
+        }
+      })
+    }
+
+    onMounted(() => {
+      setSort()
+    })
+
+    return {
+      dragSelectRef,
+      selectVal,
+      handleChange
+    }
+  }
 }
 </script>
 
-<style lang="scss" scoped>
-.drag-select {
-  ::v-deep {
-    .sortable-ghost {
-      opacity: 0.8;
-      color: #fff !important;
-      background: #42b983 !important;
-    }
+<style scoped>
+.drag-select >>> .sortable-ghost {
+  opacity: .8;
+  color: #fff !important;
+  background: #42b983 !important;
+}
 
-    .el-tag {
-      cursor: pointer;
-    }
-  }
+.drag-select >>> .ant-select-selection-item {
+  cursor: pointer;
 }
 </style>
