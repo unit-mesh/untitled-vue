@@ -10,44 +10,32 @@
   </svg>
 </template>
 
-<script>
-// doc: https://panjiachen.github.io/vue-element-admin-site/feature/component/svg-icon.html#usage
+<script setup>
+import { computed } from 'vue'
 import { isExternal } from '../utils/validate'
 
-export default {
-  name: 'SvgIcon',
-  props: {
-    iconClass: {
-      type: String,
-      required: true,
-    },
-    className: {
-      type: String,
-      default: '',
-    },
+const props = defineProps({
+  iconClass: {
+    type: String,
+    required: true,
   },
-  computed: {
-    isExternal() {
-      return isExternal(this.iconClass)
-    },
-    iconName() {
-      return `#icon-${this.iconClass}`
-    },
-    svgClass() {
-      if (this.className) {
-        return 'svg-icon ' + this.className
-      } else {
-        return 'svg-icon'
-      }
-    },
-    styleExternalIcon() {
-      return {
-        mask: `url(${this.iconClass}) no-repeat 50% 50%`,
-        '-webkit-mask': `url(${this.iconClass}) no-repeat 50% 50%`,
-      }
-    },
+  className: {
+    type: String,
+    default: '',
   },
-}
+})
+
+const isExternal = computed(() => isExternal(props.iconClass))
+const iconName = computed(() => `#icon-${props.iconClass}`)
+const svgClass = computed(() => {
+  return props.className ? `svg-icon ${props.className}` : 'svg-icon'
+})
+const styleExternalIcon = computed(() => {
+  return {
+    mask: `url(${props.iconClass}) no-repeat 50% 50%`,
+    '-webkit-mask': `url(${props.iconClass}) no-repeat 50% 50%`,
+  }
+})
 </script>
 
 <style scoped>

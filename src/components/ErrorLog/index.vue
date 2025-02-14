@@ -1,100 +1,80 @@
 <template>
   <div v-if="errorLogs.length > 0">
-    <el-badge
-      :is-dot="true"
-      style="line-height: 25px; margin-top: -5px"
-      @click="dialogTableVisible = true"
-    >
-      <el-button style="padding: 8px 10px" size="small" type="danger">
+    <a-badge :count="1" dot @click="dialogTableVisible = true">
+      <a-button style="padding: 8px 10px" size="small" danger>
         <svg-icon icon-class="bug" />
-      </el-button>
-    </el-badge>
+      </a-button>
+    </a-badge>
 
-    <el-dialog v-model="dialogTableVisible" width="80%" append-to-body>
-      <template v-slot:title>
+    <a-modal
+      v-model:visible="dialogTableVisible"
+      width="80%"
+      :footer="null"
+      :maskClosable="false"
+      :closable="false"
+    >
+      <template #title>
         <div>
           <span style="padding-right: 10px">Error Log</span>
-          <el-button
-            size="mini"
-            type="primary"
-            :icon="ElIconDelete"
-            @click="clearAll"
-            >Clear All</el-button
-          >
+          <a-button size="small" type="primary" @click="clearAll">
+            <template #icon><DeleteOutlined /></template>
+            Clear All
+          </a-button>
         </div>
       </template>
-      <el-table :data="errorLogs" border>
-        <el-table-column label="Message">
-          <template v-slot="{ row }">
+      <a-table :dataSource="errorLogs" :columns="columns" bordered>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'message'">
             <div>
               <span class="message-title">Msg:</span>
-              <el-tag type="danger">
-                {{ row.err.message }}
-              </el-tag>
+              <a-tag color="error">
+                {{ record.err.message }}
+              </a-tag>
             </div>
             <br />
             <div>
-              <span class="message-title" style="padding-right: 10px"
-                >Info:
-              </span>
-              <el-tag type="warning">
-                {{ row.vm.$vnode.tag }} error in {{ row.info }}
-              </el-tag>
+              <span class="message-title" style="padding-right: 10px">Info:</span>
+              <a-tag color="warning">
+                {{ record.vm.$vnode.tag }} error in {{ record.info }}
+              </a-tag>
             </div>
             <br />
             <div>
-              <span class="message-title" style="padding-right: 16px"
-                >Url:
-              </span>
-              <el-tag type="success">
-                {{ row.url }}
-              </el-tag>
+              <span class="message-title" style="padding-right: 16px">Url:</span>
+              <a-tag color="success">
+                {{ record.url }}
+              </a-tag>
             </div>
           </template>
-        </el-table-column>
-        <el-table-column label="Stack">
-          <template v-slot="scope">
-            {{ scope.row.err.stack }}
+          <template v-else-if="column.key === 'stack'">
+            {{ record.err.stack }}
           </template>
-        </el-table-column>
-      </el-table>
-    </el-dialog>
+        </template>
+      </a-table>
+    </a-modal>
   </div>
 </template>
 
-<script>
-import { Delete as ElIconDelete } from '@element-plus/icons'
-import { ElTable, ElTableColumn, ElButton, ElDialog, ElTag, ElBadge } from 'element-plus'
+<script setup>
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
+import { DeleteOutlined } from '@ant-design/icons-vue'
+import { Badge as ABadge, Button as AButton, Modal as AModal, Table as ATable, Tag as ATag } from 'ant-design-vue'
 import SvgIcon from '../SvgIcon/index.vue'
 
-export default {
-  components: {
-    SvgIcon,
-    ElTable,
-    ElTableColumn,
-    ElButton,
-    ElDialog,
-    ElTag,
-    ElBadge,
-  },
-  data() {
-    return {
-      dialogTableVisible: false,
-      ElIconDelete,
-    }
-  },
-  name: 'ErrorLog',
-  computed: {
-    errorLogs() {
-      return this.$store.getters.errorLogs || []
-    },
-  },
-  methods: {
-    clearAll() {
-      this.dialogTableVisible = false
-      this.$store.dispatch('errorLog/clearErrorLog')
-    },
-  },
+const store = useStore()
+const dialogTableVisible = ref(false)
+
+const errorLogs = computed(() => store.getters.errorLogs || [])
+
+const columns = [
+  { title: 'Message', key: 'message' },
+  { title: 'Stack', key: 'stack' }
+]
+
+const clearAll = () => {
+  dialogTableVisible.value = false
+  store.dispatch('errorLog/clearErrorLog')
 }
 </script>
 

@@ -1,14 +1,14 @@
 <template>
   <div :class="computedClasses" class="material-input__component">
     <div :class="{ iconClass: icon }">
-      <i
+      <a-icon
         v-if="icon"
-        :class="['el-icon-' + icon]"
-        class="el-input__icon material-input__icon"
+        :type="icon"
+        class="material-input__icon"
       />
-      <input
+      <a-input
         v-if="type === 'email'"
-        v-model="currentValue"
+        v-model:value="currentValue"
         :name="name"
         :placeholder="fillPlaceHolder"
         :readonly="readonly"
@@ -21,9 +21,9 @@
         @blur="handleMdBlur"
         @input="handleModelInput"
       />
-      <input
+      <a-input
         v-if="type === 'url'"
-        v-model="currentValue"
+        v-model:value="currentValue"
         :name="name"
         :placeholder="fillPlaceHolder"
         :readonly="readonly"
@@ -36,9 +36,9 @@
         @blur="handleMdBlur"
         @input="handleModelInput"
       />
-      <input
+      <a-input
         v-if="type === 'number'"
-        v-model="currentValue"
+        v-model:value="currentValue"
         :name="name"
         :placeholder="fillPlaceHolder"
         :step="step"
@@ -56,9 +56,9 @@
         @blur="handleMdBlur"
         @input="handleModelInput"
       />
-      <input
+      <a-input
         v-if="type === 'password'"
-        v-model="currentValue"
+        v-model:value="currentValue"
         :name="name"
         :placeholder="fillPlaceHolder"
         :readonly="readonly"
@@ -73,9 +73,9 @@
         @blur="handleMdBlur"
         @input="handleModelInput"
       />
-      <input
+      <a-input
         v-if="type === 'tel'"
-        v-model="currentValue"
+        v-model:value="currentValue"
         :name="name"
         :placeholder="fillPlaceHolder"
         :readonly="readonly"
@@ -88,9 +88,9 @@
         @blur="handleMdBlur"
         @input="handleModelInput"
       />
-      <input
+      <a-input
         v-if="type === 'text'"
-        v-model="currentValue"
+        v-model:value="currentValue"
         :name="name"
         :placeholder="fillPlaceHolder"
         :readonly="readonly"
@@ -114,11 +114,16 @@
 </template>
 
 <script>
-import { $on, $off, $once, $emit } from '../utils/gogocodeTransfer'
-export default {
+import { defineComponent, ref, watch, computed } from 'vue';
+import { Input, Icon } from 'ant-design-vue';
+
+export default defineComponent({
   name: 'MdInput',
+  components: {
+    AInput: Input,
+    AIcon: Icon,
+  },
   props: {
-    /* eslint-disable */
     icon: String,
     name: String,
     type: {
@@ -147,65 +152,53 @@ export default {
       default: true,
     },
   },
-  data() {
+  emits: ['update:value', 'change', 'focus', 'blur'],
+  setup(props, { emit }) {
+    const currentValue = ref(props.value);
+    const focus = ref(false);
+    const fillPlaceHolder = ref(null);
+
+    const computedClasses = computed(() => ({
+      'material--active': focus.value,
+      'material--disabled': props.disabled,
+      'material--raised': focus.value || Boolean(currentValue.value),
+    }));
+
+    watch(() => props.value, (newValue) => {
+      currentValue.value = newValue;
+    });
+
+    const handleModelInput = (event) => {
+      const value = event.target.value;
+      emit('update:value', value);
+      emit('change', value);
+    };
+
+    const handleMdFocus = (event) => {
+      focus.value = true;
+      emit('focus', event);
+      if (props.placeholder && props.placeholder !== '') {
+        fillPlaceHolder.value = props.placeholder;
+      }
+    };
+
+    const handleMdBlur = (event) => {
+      focus.value = false;
+      emit('blur', event);
+      fillPlaceHolder.value = null;
+    };
+
     return {
-      currentValue: this.value,
-      focus: false,
-      fillPlaceHolder: null,
-    }
+      currentValue,
+      focus,
+      fillPlaceHolder,
+      computedClasses,
+      handleModelInput,
+      handleMdFocus,
+      handleMdBlur,
+    };
   },
-  computed: {
-    computedClasses() {
-      return {
-        'material--active': this.focus,
-        'material--disabled': this.disabled,
-        'material--raised': Boolean(this.focus || this.currentValue), // has value
-      }
-    },
-  },
-  watch: {
-    value(newValue) {
-      this.currentValue = newValue
-    },
-  },
-  methods: {
-    handleModelInput(event) {
-      const value = event.target.value
-      $emit(this, 'update:value', value)
-      if (this.$parent.$options.componentName === 'ElFormItem') {
-        if (this.validateEvent) {
-          $emit(this.$parent, 'el.form.change', [value])
-        }
-      }
-      $emit(this, 'change', value)
-    },
-    handleMdFocus(event) {
-      this.focus = true
-      $emit(this, 'focus', event)
-      if (this.placeholder && this.placeholder !== '') {
-        this.fillPlaceHolder = this.placeholder
-      }
-    },
-    handleMdBlur(event) {
-      this.focus = false
-      $emit(this, 'blur', event)
-      this.fillPlaceHolder = null
-      if (this.$parent.$options.componentName === 'ElFormItem') {
-        if (this.validateEvent) {
-          $emit(this.$parent, 'el.form.blur', [this.currentValue])
-        }
-      }
-    },
-  },
-  emits: [
-    'update:value',
-    'el.form.change',
-    'change',
-    'focus',
-    'blur',
-    'el.form.blur',
-  ],
-}
+});
 </script>
 
 <style lang="scss" scoped>

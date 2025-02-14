@@ -1,22 +1,22 @@
 <template>
   <div class="upload-container">
-    <el-upload
+    <a-upload
       :data="dataObj"
       :multiple="false"
       :show-file-list="false"
-      :on-success="handleImageSuccess"
+      :before-upload="beforeUpload"
+      @change="handleImageSuccess"
       class="image-uploader"
-      drag
       action="https://httpbin.org/post"
     >
-      <el-icon><el-icon-upload /></el-icon>
-      <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-    </el-upload>
+      <a-icon type="upload" />
+      <div class="a-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+    </a-upload>
     <div class="image-preview image-app-preview">
       <div v-show="imageUrl.length > 1" class="image-preview-wrapper">
         <img :src="imageUrl" />
         <div class="image-preview-action">
-          <el-icon><el-icon-delete /></el-icon>
+          <a-icon type="delete" />
         </div>
       </div>
     </div>
@@ -24,7 +24,7 @@
       <div v-show="imageUrl.length > 1" class="image-preview-wrapper">
         <img :src="imageUrl" />
         <div class="image-preview-action">
-          <el-icon><el-icon-delete /></el-icon>
+          <a-icon type="delete" />
         </div>
       </div>
     </div>
@@ -32,17 +32,13 @@
 </template>
 
 <script>
-import {
-  Upload as ElIconUpload,
-  Delete as ElIconDelete,
-} from '@element-plus/icons'
-import { $on, $off, $once, $emit } from '../utils/gogocodeTransfer'
-import { getToken } from '@/api/qiniu'
+import { Upload as AUpload, Icon as AIcon } from 'ant-design-vue';
+import { getToken } from '@/api/qiniu';
 
 export default {
   components: {
-    ElIconUpload,
-    ElIconDelete,
+    AUpload,
+    AIcon,
   },
   name: 'SingleImageUpload3',
   props: {
@@ -55,44 +51,46 @@ export default {
     return {
       tempUrl: '',
       dataObj: { token: '', key: '' },
-    }
+    };
   },
   computed: {
     imageUrl() {
-      return this.value
+      return this.value;
     },
   },
   methods: {
     rmImage() {
-      this.emitInput('')
+      this.$emit('update:value', '');
     },
     emitInput(val) {
-      $emit(this, 'update:value', val)
+      this.$emit('update:value', val);
     },
-    handleImageSuccess(file) {
-      this.emitInput(file.files.file)
+    handleImageSuccess(info) {
+      if (info.file.status === 'done') {
+        this.emitInput(info.file.response.files.file);
+      }
     },
     beforeUpload() {
-      const _self = this
+      const _self = this;
       return new Promise((resolve, reject) => {
         getToken()
           .then((response) => {
-            const key = response.data.qiniu_key
-            const token = response.data.qiniu_token
-            _self._data.dataObj.token = token
-            _self._data.dataObj.key = key
-            this.tempUrl = response.data.qiniu_url
-            resolve(true)
+            const key = response.data.qiniu_key;
+            const token = response.data.qiniu_token;
+            _self.dataObj.token = token;
+            _self.dataObj.key = key;
+            _self.tempUrl = response.data.qiniu_url;
+            resolve(true);
           })
           .catch((err) => {
-            console.log(err)
-            reject(false)
-          })
-      })
+            console.log(err);
+            reject(false);
+          });
+      });
     },
   },
   emits: ['update:value'],
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -137,7 +135,7 @@ export default {
       cursor: pointer;
       text-align: center;
       line-height: 200px;
-      .el-icon-delete {
+      .a-icon-delete {
         font-size: 36px;
       }
     }

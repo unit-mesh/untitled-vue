@@ -1,6 +1,6 @@
 <template>
   <a-select
-      ref="dragSelect"
+      ref="dragSelectRef"
       v-model:value="selectVal"
       v-bind="$attrs"
       class="drag-select"
@@ -45,7 +45,6 @@ export default {
     }
 
     const setSort = () => {
-      console.log(dragSelectRef)
       const el = dragSelectRef.value.$el.querySelectorAll('.ant-select-selection-overflow')[0]
       Sortable.create(el, {
         ghostClass: 'sortable-ghost',

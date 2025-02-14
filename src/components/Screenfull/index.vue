@@ -1,67 +1,66 @@
 <template>
   <div>
-    <svg-icon
-      :icon-class="isFullscreen ? 'exit-fullscreen' : 'fullscreen'"
+    <a-icon
+      :type="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
       @click="click"
     />
   </div>
 </template>
 
 <script>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import screenfull from 'screenfull'
-import SvgIcon from '../SvgIcon/index.vue'
 
 export default {
   name: 'Screenfull',
-  components: {
-    SvgIcon,
-  },
-  data() {
-    return {
-      isFullscreen: false,
-    }
-  },
-  mounted() {
-    this.init()
-  },
-  beforeUnmount() {
-    this.destroy()
-  },
-  methods: {
-    click() {
+  setup() {
+    const isFullscreen = ref(false)
+
+    const click = () => {
       if (!screenfull.enabled) {
-        this.$message({
-          message: 'you browser can not work',
-          type: 'warning',
-        })
+        alert('Your browser cannot work') // Ant Design Vue 没有直接的 $message 方法，可以用 alert 代替
         return false
       }
       screenfull.toggle()
-    },
-    change() {
-      this.isFullscreen = screenfull.isFullscreen
-    },
-    init() {
+    }
+
+    const change = () => {
+      isFullscreen.value = screenfull.isFullscreen
+    }
+
+    const init = () => {
       if (screenfull.enabled) {
-        screenfull.on('change', this.change)
+        screenfull.on('change', change)
       }
-    },
-    destroy() {
+    }
+
+    const destroy = () => {
       if (screenfull.enabled) {
-        screenfull.off('change', this.change)
+        screenfull.off('change', change)
       }
-    },
+    }
+
+    onMounted(() => {
+      init()
+    })
+
+    onBeforeUnmount(() => {
+      destroy()
+    })
+
+    return {
+      isFullscreen,
+      click,
+    }
   },
 }
 </script>
 
 <style scoped>
-.screenfull-svg {
+.anticon {
   display: inline-block;
   cursor: pointer;
-  fill: #5a5e66;
-  width: 20px;
-  height: 20px;
+  font-size: 20px;
   vertical-align: 10px;
 }
 </style>

@@ -1,13 +1,13 @@
 <template>
-  <div :id="id" :class="className" :style="{ height: height, width: width }" />
+  <div :id="id" :class="className" :style="{ height: height, width: width }"></div>
 </template>
 
 <script>
-import echarts from 'echarts'
-import resize from './mixins/resize'
+import { defineComponent, onMounted, onBeforeUnmount, ref } from 'vue';
+import * as echarts from 'echarts';
+import useResize from './composables/useResize';
 
-export default {
-  mixins: [resize],
+export default defineComponent({
   props: {
     className: {
       type: String,
@@ -26,26 +26,13 @@ export default {
       default: '200px',
     },
   },
-  data() {
-    return {
-      chart: null,
-    }
-  },
-  mounted() {
-    this.initChart()
-  },
-  beforeUnmount() {
-    if (!this.chart) {
-      return
-    }
-    this.chart.dispose()
-    this.chart = null
-  },
-  methods: {
-    initChart() {
-      this.chart = echarts.init(document.getElementById(this.id))
+  setup(props) {
+    const chart = ref(null);
 
-      this.chart.setOption({
+    const initChart = () => {
+      chart.value = echarts.init(document.getElementById(props.id));
+
+      chart.value.setOption({
         backgroundColor: '#394056',
         title: {
           top: 20,
@@ -269,8 +256,28 @@ export default {
             data: [220, 182, 125, 145, 122, 191, 134, 150, 120, 110, 165, 122],
           },
         ],
-      })
-    },
+      });
+    };
+
+    onMounted(() => {
+      initChart();
+      useResize(() => {
+        if (chart.value) {
+          chart.value.resize();
+        }
+      });
+    });
+
+    onBeforeUnmount(() => {
+      if (chart.value) {
+        chart.value.dispose();
+        chart.value = null;
+      }
+    });
+
+    return {
+      chart,
+    };
   },
-}
+});
 </script>

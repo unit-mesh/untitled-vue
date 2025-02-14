@@ -8,33 +8,29 @@
         <slot />
       </div>
     </div>
-    <!-- eslint-disable-next-line -->
     <div :style="{ backgroundImage: `url(${image})` }" class="pan-thumb"></div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'PanThumb',
-  props: {
-    image: {
-      type: String,
-      required: true,
-    },
-    zIndex: {
-      type: Number,
-      default: 1,
-    },
-    width: {
-      type: String,
-      default: '150px',
-    },
-    height: {
-      type: String,
-      default: '150px',
-    },
+<script setup>
+const props = defineProps({
+  image: {
+    type: String,
+    required: true,
   },
-}
+  zIndex: {
+    type: Number,
+    default: 1,
+  },
+  width: {
+    type: String,
+    default: '150px',
+  },
+  height: {
+    type: String,
+    default: '150px',
+  },
+});
 </script>
 
 <style scoped>

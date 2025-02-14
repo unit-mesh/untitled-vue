@@ -15,219 +15,166 @@
   </div>
 </template>
 
-<script>
-import { $on, $off, $once, $emit } from '../utils/gogocodeTransfer'
-/**
- * docs:
- * https://panjiachen.github.io/vue-element-admin-site/feature/component/rich-editor.html#tinymce
- */
-import editorImage from './components/EditorImage'
-import plugins from './plugins'
-import toolbar from './toolbar'
-import load from './dynamicLoadScript'
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount, onActivated, onDeactivated } from 'vue';
+import editorImage from './components/EditorImage.vue';
+import plugins from './plugins';
+import toolbar from './toolbar';
+import load from './dynamicLoadScript';
 
 // why use this cdn, detail see https://github.com/PanJiaChen/tinymce-all-in-one
-const tinymceCDN =
-  'https://cdn.jsdelivr.net/npm/tinymce-all-in-one@4.9.3/tinymce.min.js'
+const tinymceCDN = 'https://cdn.jsdelivr.net/npm/tinymce-all-in-one@4.9.3/tinymce.min.js';
 
-export default {
-  name: 'Tinymce',
-  components: { editorImage },
-  props: {
-    id: {
-      type: String,
-      default: function () {
-        return (
-          'vue-tinymce-' +
-          +new Date() +
-          ((Math.random() * 1000).toFixed(0) + '')
-        )
-      },
-    },
-    value: {
-      type: String,
-      default: '',
-    },
-    toolbar: {
-      type: Array,
-      required: false,
-      default() {
-        return []
-      },
-    },
-    menubar: {
-      type: String,
-      default: 'file edit insert view format table',
-    },
-    height: {
-      type: [Number, String],
-      required: false,
-      default: 360,
-    },
-    width: {
-      type: [Number, String],
-      required: false,
-      default: 'auto',
-    },
+const props = defineProps({
+  id: {
+    type: String,
+    default: () => 'vue-tinymce-' + +new Date() + ((Math.random() * 1000).toFixed(0) + ''),
   },
-  data() {
-    return {
-      hasChange: false,
-      hasInit: false,
-      tinymceId: this.id,
-      fullscreen: false,
-      languageTypeList: {
-        en: 'en',
-        zh: 'zh_CN',
-        es: 'es_MX',
-        ja: 'ja',
-      },
-    }
+  value: {
+    type: String,
+    default: '',
   },
-  computed: {
-    containerWidth() {
-      const width = this.width
-      if (/^[\d]+(\.[\d]+)?$/.test(width)) {
-        // matches `100`, `'100'`
-        return `${width}px`
-      }
-      return width
-    },
+  toolbar: {
+    type: Array,
+    required: false,
+    default: () => [],
   },
-  watch: {
-    value(val) {
-      if (!this.hasChange && this.hasInit) {
-        this.$nextTick(() =>
-          window.tinymce.get(this.tinymceId).setContent(val || '')
-        )
-      }
-    },
+  menubar: {
+    type: String,
+    default: 'file edit insert view format table',
   },
-  mounted() {
-    this.init()
+  height: {
+    type: [Number, String],
+    required: false,
+    default: 360,
   },
-  activated() {
-    if (window.tinymce) {
-      this.initTinymce()
-    }
+  width: {
+    type: [Number, String],
+    required: false,
+    default: 'auto',
   },
-  deactivated() {
-    this.destroyTinymce()
-  },
-  unmounted() {
-    this.destroyTinymce()
-  },
-  methods: {
-    init() {
-      // dynamic load tinymce from cdn
-      load(tinymceCDN, (err) => {
-        if (err) {
-          this.$message.error(err.message)
-          return
-        }
-        this.initTinymce()
-      })
-    },
-    initTinymce() {
-      const _this = this
-      window.tinymce.init({
-        selector: `#${this.tinymceId}`,
-        language: this.languageTypeList['en'],
-        height: this.height,
-        body_class: 'panel-body ',
-        object_resizing: false,
-        toolbar: this.toolbar.length > 0 ? this.toolbar : toolbar,
-        menubar: this.menubar,
-        plugins: plugins,
-        end_container_on_empty_block: true,
-        powerpaste_word_import: 'clean',
-        code_dialog_height: 450,
-        code_dialog_width: 1000,
-        advlist_bullet_styles: 'square',
-        advlist_number_styles: 'default',
-        imagetools_cors_hosts: ['www.tinymce.com', 'codepen.io'],
-        default_link_target: '_blank',
-        link_title: false,
-        nonbreaking_force_tab: true, // inserting nonbreaking space &nbsp; need Nonbreaking Space Plugin
-        init_instance_callback: (editor) => {
-          if (_this.value) {
-            editor.setContent(_this.value)
-          }
-          _this.hasInit = true
-          editor.on('NodeChange Change KeyUp SetContent', () => {
-            this.hasChange = true
-            $emit(this, 'update:value', editor.getContent())
-          })
-        },
-        setup(editor) {
-          editor.on('FullscreenStateChanged', (e) => {
-            _this.fullscreen = e.state
-          })
-        },
-        // it will try to keep these URLs intact
-        // https://www.tiny.cloud/docs-3x/reference/configuration/Configuration3x@convert_urls/
-        // https://stackoverflow.com/questions/5196205/disable-tinymce-absolute-to-relative-url-conversions
-        convert_urls: false,
-        // 整合七牛上传
-        // images_dataimg_filter(img) {
-        //   setTimeout(() => {
-        //     const $image = $(img);
-        //     $image.removeAttr('width');
-        //     $image.removeAttr('height');
-        //     if ($image[0].height && $image[0].width) {
-        //       $image.attr('data-wscntype', 'image');
-        //       $image.attr('data-wscnh', $image[0].height);
-        //       $image.attr('data-wscnw', $image[0].width);
-        //       $image.addClass('wscnph');
-        //     }
-        //   }, 0);
-        //   return img
-        // },
-        // images_upload_handler(blobInfo, success, failure, progress) {
-        //   progress(0);
-        //   const token = _this.$store.getters.token;
-        //   getToken(token).then(response => {
-        //     const url = response.data.qiniu_url;
-        //     const formData = new FormData();
-        //     formData.append('token', response.data.qiniu_token);
-        //     formData.append('key', response.data.qiniu_key);
-        //     formData.append('file', blobInfo.blob(), url);
-        //     upload(formData).then(() => {
-        //       success(url);
-        //       progress(100);
-        //     })
-        //   }).catch(err => {
-        //     failure('出现未知问题，刷新页面，或者联系程序员')
-        //     console.log(err);
-        //   });
-        // },
-      })
-    },
-    destroyTinymce() {
-      const tinymce = window.tinymce.get(this.tinymceId)
-      if (this.fullscreen) {
-        tinymce.execCommand('mceFullScreen')
-      }
+});
 
-      if (tinymce) {
-        tinymce.destroy()
+const emit = defineEmits(['update:value']);
+
+const hasChange = ref(false);
+const hasInit = ref(false);
+const tinymceId = ref(props.id);
+const fullscreen = ref(false);
+const languageTypeList = {
+  en: 'en',
+  zh: 'zh_CN',
+  es: 'es_MX',
+  ja: 'ja',
+};
+
+const containerWidth = computed(() => {
+  const width = props.width;
+  if (/^[\d]+(\.[\d]+)?$/.test(width)) {
+    return `${width}px`;
+  }
+  return width;
+});
+
+watch(() => props.value, (val) => {
+  if (!hasChange.value && hasInit.value) {
+    nextTick(() => window.tinymce.get(tinymceId.value).setContent(val || ''));
+  }
+});
+
+onMounted(() => {
+  init();
+});
+
+onActivated(() => {
+  if (window.tinymce) {
+    initTinymce();
+  }
+});
+
+onDeactivated(() => {
+  destroyTinymce();
+});
+
+onBeforeUnmount(() => {
+  destroyTinymce();
+});
+
+function init() {
+  load(tinymceCDN, (err) => {
+    if (err) {
+      message.error(err.message);
+      return;
+    }
+    initTinymce();
+  });
+}
+
+function initTinymce() {
+  const _this = this;
+  window.tinymce.init({
+    selector: `#${tinymceId.value}`,
+    language: languageTypeList['en'],
+    height: props.height,
+    body_class: 'panel-body ',
+    object_resizing: false,
+    toolbar: props.toolbar.length > 0 ? props.toolbar : toolbar,
+    menubar: props.menubar,
+    plugins: plugins,
+    end_container_on_empty_block: true,
+    powerpaste_word_import: 'clean',
+    code_dialog_height: 450,
+    code_dialog_width: 1000,
+    advlist_bullet_styles: 'square',
+    advlist_number_styles: 'default',
+    imagetools_cors_hosts: ['www.tinymce.com', 'codepen.io'],
+    default_link_target: '_blank',
+    link_title: false,
+    nonbreaking_force_tab: true, // inserting nonbreaking space &nbsp; need Nonbreaking Space Plugin
+    init_instance_callback: (editor) => {
+      if (props.value) {
+        editor.setContent(props.value);
       }
+      hasInit.value = true;
+      editor.on('NodeChange Change KeyUp SetContent', () => {
+        hasChange.value = true;
+        emit('update:value', editor.getContent());
+      });
     },
-    setContent(value) {
-      window.tinymce.get(this.tinymceId).setContent(value)
+    setup(editor) {
+      editor.on('FullscreenStateChanged', (e) => {
+        fullscreen.value = e.state;
+      });
     },
-    getContent() {
-      window.tinymce.get(this.tinymceId).getContent()
-    },
-    imageSuccessCBK(arr) {
-      arr.forEach((v) =>
-        window.tinymce
-          .get(this.tinymceId)
-          .insertContent(`<img class="wscnph" src="${v.url}" >`)
-      )
-    },
-  },
-  emits: ['update:value'],
+    convert_urls: false,
+  });
+}
+
+function destroyTinymce() {
+  const tinymce = window.tinymce.get(tinymceId.value);
+  if (fullscreen.value) {
+    tinymce.execCommand('mceFullScreen');
+  }
+
+  if (tinymce) {
+    tinymce.destroy();
+  }
+}
+
+function setContent(value) {
+  window.tinymce.get(tinymceId.value).setContent(value);
+}
+
+function getContent() {
+  return window.tinymce.get(tinymceId.value).getContent();
+}
+
+function imageSuccessCBK(arr) {
+  arr.forEach((v) =>
+    window.tinymce
+      .get(tinymceId.value)
+      .insertContent(`<img class="wscnph" src="${v.url}" >`)
+  );
 }
 </script>
 

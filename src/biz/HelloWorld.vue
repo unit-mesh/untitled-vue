@@ -6,70 +6,55 @@
     <!-- PanThumb 组件，显示用户头像 -->
     <PanThumb class="user-thumb" image="https://picsum.photos/100/100" />
 
-    <!-- ThemePicker 组件，主题切换 -->
-<!--    <ThemePicker class="theme-picker" />-->
-
     <!-- Screenfull 组件，全屏切换 -->
     <Screenfull class="screenfull" />
 
     <!-- 主内容区域 -->
     <div class="content">
-      <dnd-list
+      <DndList
         :list1="list1"
         :list2="list2"
         :list1Title="list1Title"
         :list2Title="list2Title"
         :width1="width1"
-        :width2="width2">
+        :width2="width2"
+      />
 
-      </dnd-list>
-
-      <drag-select value="hello">
+      <DragSelect v-model:value="hello">
         <div class="title">Hello World</div>
-      </drag-select>
+      </DragSelect>
 
-      <MdInput type="text" v-model="hello" placeholder="请输入内容" />
+      <a-input v-model:value="hello" placeholder="请输入内容" />
 
-      <MarkdownEditor v-model="hello" />
+      <MarkdownEditor v-model:value="hello" />
     </div>
 
     <!-- 返回顶部按钮 -->
-    <BackToTop class="back-to-top" v-show="true" />
+    <BackToTop class="back-to-top" v-if="true" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
 import Hamburger from '../components/Hamburger/index.vue';
 import PanThumb from '../components/PanThumb/index.vue';
 import Screenfull from '../components/Screenfull/index.vue';
 import BackToTop from '../components/BackToTop/index.vue';
-import MdInput from '../components/MDinput/index.vue'
-import MarkdownEditor from '../components/MarkdownEditor/index.vue'
-import ErrorLog from '../components/ErrorLog/index.vue'
-import Dropzone from '../components/Dropzone/index.vue'
-import DragSelect from '../components/DragSelect/index.vue'
-import DndList from '../components/DndList/index.vue'
+import MarkdownEditor from '../components/MarkdownEditor/index.vue';
+import DragSelect from '../components/DragSelect/index.vue';
+import DndList from '../components/DndList/index.vue';
+import { Input as AInput } from 'ant-design-vue';
 
-export default {
-  name: 'HelloWorld',
-  components: {
-    DndList,
-    MarkdownEditor,
-    MdInput,
-    Hamburger,
-    PanThumb,
-    // ThemePicker,
-    Screenfull,
-    BackToTop,
-    ErrorLog,
-    Dropzone,
-    DragSelect,
-  },
-  methods: {
-    toggleSideBar() {
-      console.log('Toggle sidebar');
-    },
-  },
+const hello = ref('Hello World');
+const list1 = ref([/* 初始化 list1 数据 */]);
+const list2 = ref([/* 初始化 list2 数据 */]);
+const list1Title = ref('List 1');
+const list2Title = ref('List 2');
+const width1 = ref(200);
+const width2 = ref(200);
+
+const toggleSideBar = () => {
+  console.log('Toggle sidebar');
 };
 </script>
 
@@ -92,12 +77,6 @@ export default {
 .user-thumb {
   position: absolute;
   top: 20px;
-  right: 20px;
-}
-
-.theme-picker {
-  position: absolute;
-  top: 80px;
   right: 20px;
 }
 

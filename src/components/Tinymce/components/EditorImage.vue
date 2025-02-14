@@ -1,121 +1,138 @@
 <template>
   <div class="upload-container">
-    <el-button
+    <a-button
       :style="{ background: color, borderColor: color }"
-      :icon="ElIconUpload"
-      size="mini"
+      :icon="UploadOutlined"
+      size="small"
       type="primary"
       @click="dialogVisible = true"
     >
       upload
-    </el-button>
-    <el-dialog v-model="dialogVisible">
-      <el-upload
+    </a-button>
+    <a-modal v-model:visible="dialogVisible" :footer="null">
+      <a-upload
         :multiple="true"
         :file-list="fileList"
-        :show-file-list="true"
+        :show-upload-list="true"
+        :before-upload="beforeUpload"
         :on-remove="handleRemove"
         :on-success="handleSuccess"
-        :before-upload="beforeUpload"
         class="editor-slide-upload"
         action="https://httpbin.org/post"
         list-type="picture-card"
       >
-        <el-button size="small" type="primary"> Click upload </el-button>
-      </el-upload>
-      <el-button @click="dialogVisible = false"> Cancel </el-button>
-      <el-button type="primary" @click="handleSubmit"> Confirm </el-button>
-    </el-dialog>
+        <a-button size="small" type="primary"> Click upload </a-button>
+      </a-upload>
+      <div style="text-align: right; margin-top: 10px;">
+        <a-button @click="dialogVisible = false"> Cancel </a-button>
+        <a-button type="primary" @click="handleSubmit"> Confirm </a-button>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script>
-import { Upload as ElIconUpload } from '@element-plus/icons'
-import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
-export default {
-  data() {
-    return {
-      dialogVisible: false,
-      listObj: {},
-      fileList: [],
-      ElIconUpload,
-    }
-  },
+import { defineComponent, ref } from 'vue';
+import { UploadOutlined } from '@ant-design/icons-vue';
+
+export default defineComponent({
   name: 'EditorSlideUpload',
+  components: {
+    UploadOutlined,
+  },
   props: {
     color: {
       type: String,
       default: '#1890ff',
     },
   },
-  methods: {
-    checkAllSuccess() {
-      return Object.keys(this.listObj).every(
-        (item) => this.listObj[item].hasSuccess
-      )
-    },
-    handleSubmit() {
-      const arr = Object.keys(this.listObj).map((v) => this.listObj[v])
-      if (!this.checkAllSuccess()) {
-        this.$message(
+  emits: ['successCBK'],
+  setup(props, { emit }) {
+    const dialogVisible = ref(false);
+    const listObj = ref({});
+    const fileList = ref([]);
+
+    const checkAllSuccess = () => {
+      return Object.keys(listObj.value).every(
+        (item) => listObj.value[item].hasSuccess
+      );
+    };
+
+    const handleSubmit = () => {
+      const arr = Object.keys(listObj.value).map((v) => listObj.value[v]);
+      if (!checkAllSuccess()) {
+        alert(
           'Please wait for all images to be uploaded successfully. If there is a network problem, please refresh the page and upload again!'
-        )
-        return
+        );
+        return;
       }
-      $emit(this, 'successCBK', arr)
-      this.listObj = {}
-      this.fileList = []
-      this.dialogVisible = false
-    },
-    handleSuccess(response, file) {
-      const uid = file.uid
-      const objKeyArr = Object.keys(this.listObj)
+      emit('successCBK', arr);
+      listObj.value = {};
+      fileList.value = [];
+      dialogVisible.value = false;
+    };
+
+    const handleSuccess = (response, file) => {
+      const uid = file.uid;
+      const objKeyArr = Object.keys(listObj.value);
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
-        if (this.listObj[objKeyArr[i]].uid === uid) {
-          this.listObj[objKeyArr[i]].url = response.files.file
-          this.listObj[objKeyArr[i]].hasSuccess = true
-          return
+        if (listObj.value[objKeyArr[i]].uid === uid) {
+          listObj.value[objKeyArr[i]].url = response.files.file;
+          listObj.value[objKeyArr[i]].hasSuccess = true;
+          return;
         }
       }
-    },
-    handleRemove(file) {
-      const uid = file.uid
-      const objKeyArr = Object.keys(this.listObj)
+    };
+
+    const handleRemove = (file) => {
+      const uid = file.uid;
+      const objKeyArr = Object.keys(listObj.value);
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
-        if (this.listObj[objKeyArr[i]].uid === uid) {
-          delete this.listObj[objKeyArr[i]]
-          return
+        if (listObj.value[objKeyArr[i]].uid === uid) {
+          delete listObj.value[objKeyArr[i]];
+          return;
         }
       }
-    },
-    beforeUpload(file) {
-      const _self = this
-      const _URL = window.URL || window.webkitURL
-      const fileName = file.uid
-      this.listObj[fileName] = {}
-      return new Promise((resolve, reject) => {
-        const img = new Image()
-        img.src = _URL.createObjectURL(file)
-        img.onload = function () {
-          _self.listObj[fileName] = {
+    };
+
+    const beforeUpload = (file) => {
+      const _URL = window.URL || window.webkitURL;
+      const fileName = file.uid;
+      listObj.value[fileName] = {};
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = _URL.createObjectURL(file);
+        img.onload = () => {
+          listObj.value[fileName] = {
             hasSuccess: false,
             uid: file.uid,
-            width: this.width,
-            height: this.height,
-          }
-        }
-        resolve(true)
-      })
-    },
+            width: img.width,
+            height: img.height,
+          };
+        };
+        resolve(true);
+      });
+    };
+
+    return {
+      dialogVisible,
+      listObj,
+      fileList,
+      UploadOutlined,
+      checkAllSuccess,
+      handleSubmit,
+      handleSuccess,
+      handleRemove,
+      beforeUpload,
+    };
   },
-  emits: ['successCBK'],
-}
+});
 </script>
 
 <style lang="scss" scoped>
 .editor-slide-upload {
   margin-bottom: 20px;
-  ::v-deep .el-upload--picture-card {
+  ::v-deep .ant-upload-picture-card-wrapper {
     width: 100%;
   }
 }

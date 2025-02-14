@@ -5,9 +5,9 @@
       <div
         class="handle-button"
         :style="{ top: buttonTop + 'px', 'background-color': theme }"
-        @click="show = !show"
+        @click="toggleShow"
       >
-        <i :class="show ? 'el-icon-close' : 'el-icon-setting'" />
+        <i :class="show ? 'ant-icon-close' : 'ant-icon-setting'" />
       </div>
       <div class="rightPanel-items">
         <slot />
@@ -16,68 +16,70 @@
   </div>
 </template>
 
-<script>
-import { addClass, removeClass } from '@/utils'
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'pinia';
+import { useSettingsStore } from '@/store/settings';
+import { addClass, removeClass } from '@/utils';
 
-export default {
-  name: 'RightPanel',
-  props: {
-    clickNotClose: {
-      default: false,
-      type: Boolean,
-    },
-    buttonTop: {
-      default: 250,
-      type: Number,
-    },
+const props = defineProps({
+  clickNotClose: {
+    default: false,
+    type: Boolean,
   },
-  data() {
-    return {
-      show: false,
-    }
+  buttonTop: {
+    default: 250,
+    type: Number,
   },
-  computed: {
-    theme() {
-      return this.$store.state.settings.theme
-    },
-  },
-  watch: {
-    show(value) {
-      if (value && !this.clickNotClose) {
-        this.addEventClick()
-      }
-      if (value) {
-        addClass(document.body, 'showRightPanel')
-      } else {
-        removeClass(document.body, 'showRightPanel')
-      }
-    },
-  },
-  mounted() {
-    this.insertToBody()
-  },
-  beforeUnmount() {
-    const elx = this.$refs.rightPanel
-    elx.remove()
-  },
-  methods: {
-    addEventClick() {
-      window.addEventListener('click', this.closeSidebar)
-    },
-    closeSidebar(evt) {
-      const parent = evt.target.closest('.rightPanel')
-      if (!parent) {
-        this.show = false
-        window.removeEventListener('click', this.closeSidebar)
-      }
-    },
-    insertToBody() {
-      const elx = this.$refs.rightPanel
-      const body = document.querySelector('body')
-      body.insertBefore(elx, body.firstChild)
-    },
-  },
-}
+});
+
+const show = ref(false);
+const rightPanel = ref(null);
+
+const settingsStore = useSettingsStore();
+const theme = computed(() => settingsStore.theme);
+
+const toggleShow = () => {
+  show.value = !show.value;
+};
+
+const addEventClick = () => {
+  window.addEventListener('click', closeSidebar);
+};
+
+const closeSidebar = (evt) => {
+  const parent = evt.target.closest('.rightPanel');
+  if (!parent) {
+    show.value = false;
+    window.removeEventListener('click', closeSidebar);
+  }
+};
+
+const insertToBody = () => {
+  const elx = rightPanel.value;
+  const body = document.querySelector('body');
+  body.insertBefore(elx, body.firstChild);
+};
+
+watch(show, (value) => {
+  if (value && !props.clickNotClose) {
+    addEventClick();
+  }
+  if (value) {
+    addClass(document.body, 'showRightPanel');
+  } else {
+    removeClass(document.body, 'showRightPanel');
+  }
+});
+
+onMounted(() => {
+  insertToBody();
+});
+
+onBeforeUnmount(() => {
+  const elx = rightPanel.value;
+  elx.remove();
+});
 </script>
 
 <style>

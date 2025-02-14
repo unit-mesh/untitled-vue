@@ -3,7 +3,7 @@
     <div class="board-column-header">
       {{ headerText }}
     </div>
-    <draggable
+    <a-draggable
       v-bind="$attrs"
       :list="list"
       class="board-column-content"
@@ -12,17 +12,18 @@
       <div v-for="element in list" :key="element.id" class="board-item">
         {{ element.name }} {{ element.id }}
       </div>
-    </draggable>
+    </a-draggable>
   </div>
 </template>
 
 <script>
-import draggable from 'vuedraggable'
+import { defineComponent } from 'vue';
+import { Draggable as ADraggable } from 'ant-design-vue';
 
-export default {
+export default defineComponent({
   name: 'DragKanbanDemo',
   components: {
-    draggable,
+    ADraggable,
   },
   props: {
     headerText: {
@@ -46,10 +47,10 @@ export default {
     setData(dataTransfer) {
       // to avoid Firefox bug
       // Detail see : https://github.com/RubaXa/Sortable/issues/1012
-      dataTransfer.setData('Text', '')
+      dataTransfer.setData('Text', '');
     },
   },
-}
+});
 </script>
 
 <style lang="scss" scoped>

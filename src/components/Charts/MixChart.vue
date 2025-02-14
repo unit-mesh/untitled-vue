@@ -1,13 +1,12 @@
 <template>
-  <div :id="id" :class="className" :style="{ height: height, width: width }" />
+  <div :id="id" :class="className" :style="{ height: height, width: width }"></div>
 </template>
 
 <script>
-import echarts from 'echarts'
-import resize from './mixins/resize'
+import { defineComponent, onMounted, onBeforeUnmount, ref } from 'vue';
+import * as echarts from 'echarts';
 
-export default {
-  mixins: [resize],
+export default defineComponent({
   props: {
     className: {
       type: String,
@@ -26,32 +25,20 @@ export default {
       default: '200px',
     },
   },
-  data() {
-    return {
-      chart: null,
-    }
-  },
-  mounted() {
-    this.initChart()
-  },
-  beforeUnmount() {
-    if (!this.chart) {
-      return
-    }
-    this.chart.dispose()
-    this.chart = null
-  },
-  methods: {
-    initChart() {
-      this.chart = echarts.init(document.getElementById(this.id))
+  setup(props) {
+    const chart = ref(null);
+
+    const initChart = () => {
+      chart.value = echarts.init(document.getElementById(props.id));
       const xData = (function () {
-        const data = []
+        const data = [];
         for (let i = 1; i < 13; i++) {
-          data.push(i + 'month')
+          data.push(i + 'month');
         }
-        return data
-      })()
-      this.chart.setOption({
+        return data;
+      })();
+
+      chart.value.setOption({
         backgroundColor: '#344b58',
         title: {
           text: 'statistics',
@@ -182,7 +169,7 @@ export default {
                   },
                   position: 'insideTop',
                   formatter(p) {
-                    return p.value > 0 ? p.value : ''
+                    return p.value > 0 ? p.value : '';
                   },
                 },
               },
@@ -192,7 +179,6 @@ export default {
               4078,
             ],
           },
-
           {
             name: 'male',
             type: 'bar',
@@ -205,7 +191,7 @@ export default {
                   show: true,
                   position: 'top',
                   formatter(p) {
-                    return p.value > 0 ? p.value : ''
+                    return p.value > 0 ? p.value : '';
                   },
                 },
               },
@@ -228,7 +214,7 @@ export default {
                   show: true,
                   position: 'top',
                   formatter(p) {
-                    return p.value > 0 ? p.value : ''
+                    return p.value > 0 ? p.value : '';
                   },
                 },
               },
@@ -239,8 +225,23 @@ export default {
             ],
           },
         ],
-      })
-    },
+      });
+    };
+
+    onMounted(() => {
+      initChart();
+    });
+
+    onBeforeUnmount(() => {
+      if (chart.value) {
+        chart.value.dispose();
+        chart.value = null;
+      }
+    });
+
+    return {
+      chart,
+    };
   },
-}
+});
 </script>

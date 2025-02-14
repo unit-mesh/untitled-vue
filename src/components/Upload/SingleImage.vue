@@ -1,90 +1,80 @@
 <template>
   <div class="upload-container">
-    <el-upload
+    <a-upload
       :data="dataObj"
       :multiple="false"
       :show-file-list="false"
       :on-success="handleImageSuccess"
       class="image-uploader"
-      drag
+      name="file"
       action="https://httpbin.org/post"
+      @beforeUpload="beforeUpload"
     >
-      <el-icon><el-icon-upload /></el-icon>
-      <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-    </el-upload>
+      <a-button>
+        <upload-outlined></upload-outlined>
+        <div class="a-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+      </a-button>
+    </a-upload>
     <div class="image-preview">
       <div v-show="imageUrl.length > 1" class="image-preview-wrapper">
         <img :src="imageUrl + '?imageView2/1/w/200/h/200'" />
         <div class="image-preview-action">
-          <el-icon><el-icon-delete /></el-icon>
+          <delete-outlined @click="rmImage" />
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import {
-  Upload as ElIconUpload,
-  Delete as ElIconDelete,
-} from '@element-plus/icons'
-import { $on, $off, $once, $emit } from '../utils/gogocodeTransfer'
-import { getToken } from '@/api/qiniu'
+<script setup>
+import { ref, computed } from 'vue';
+import { Upload as AUpload, Button as AButton } from 'ant-design-vue';
+import { UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
+import { getToken } from '@/api/qiniu';
 
-export default {
-  components: {
-    ElIconUpload,
-    ElIconDelete,
+const props = defineProps({
+  value: {
+    type: String,
+    default: '',
   },
-  name: 'SingleImageUpload',
-  props: {
-    value: {
-      type: String,
-      default: '',
-    },
-  },
-  data() {
-    return {
-      tempUrl: '',
-      dataObj: { token: '', key: '' },
-    }
-  },
-  computed: {
-    imageUrl() {
-      return this.value
-    },
-  },
-  methods: {
-    rmImage() {
-      this.emitInput('')
-    },
-    emitInput(val) {
-      $emit(this, 'update:value', val)
-    },
-    handleImageSuccess() {
-      this.emitInput(this.tempUrl)
-    },
-    beforeUpload() {
-      const _self = this
-      return new Promise((resolve, reject) => {
-        getToken()
-          .then((response) => {
-            const key = response.data.qiniu_key
-            const token = response.data.qiniu_token
-            _self._data.dataObj.token = token
-            _self._data.dataObj.key = key
-            this.tempUrl = response.data.qiniu_url
-            resolve(true)
-          })
-          .catch((err) => {
-            console.log(err)
-            reject(false)
-          })
+});
+
+const emit = defineEmits(['update:value']);
+
+const tempUrl = ref('');
+const dataObj = ref({ token: '', key: '' });
+
+const imageUrl = computed(() => props.value);
+
+const rmImage = () => {
+  emit('update:value', '');
+};
+
+const emitInput = (val) => {
+  emit('update:value', val);
+};
+
+const handleImageSuccess = () => {
+  emitInput(tempUrl.value);
+};
+
+const beforeUpload = () => {
+  return new Promise((resolve, reject) => {
+    getToken()
+      .then((response) => {
+        const key = response.data.qiniu_key;
+        const token = response.data.qiniu_token;
+        dataObj.value.token = token;
+        dataObj.value.key = key;
+        tempUrl.value = response.data.qiniu_url;
+        resolve(true);
       })
-    },
-  },
-  emits: ['update:value'],
-}
+      .catch((err) => {
+        console.log(err);
+        reject(false);
+      });
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -129,7 +119,7 @@ export default {
       cursor: pointer;
       text-align: center;
       line-height: 200px;
-      .el-icon-delete {
+      .anticon-delete {
         font-size: 36px;
       }
     }

@@ -12,7 +12,7 @@
             </a-list-item-meta>
             <template #actions>
               <a @click="deleteEle(item)">
-                <a-icon type="delete" style="color: #ff4949"/>
+                <DeleteOutlined style="color: #ff4949"/>
               </a>
             </template>
           </a-list-item>
@@ -32,82 +32,75 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from 'vue'
+<script setup>
+import { ref } from 'vue'
 import { List } from 'ant-design-vue'
-import Icon from '@ant-design/icons-vue'
+import { DeleteOutlined } from '@ant-design/icons-vue'
 
-export default defineComponent({
-  components: {
-    AList: List,
-    AListItem: List.Item,
-    AListItemMeta: List.Item.Meta,
-    AIcon: Icon,
+const AList = List
+const AListItem = List.Item
+const AListItemMeta = List.Item.Meta
+
+const props = defineProps({
+  list1: {
+    type: Array,
+    default: () => [],
   },
-  name: 'DndList',
-  props: {
-    list1: {
-      type: Array,
-      default () {
-        return []
-      },
-    },
-    list2: {
-      type: Array,
-      default () {
-        return []
-      },
-    },
-    list1Title: {
-      type: String,
-      default: 'list1',
-    },
-    list2Title: {
-      type: String,
-      default: 'list2',
-    },
-    width1: {
-      type: String,
-      default: '48%',
-    },
-    width2: {
-      type: String,
-      default: '48%',
-    },
+  list2: {
+    type: Array,
+    default: () => [],
   },
-  methods: {
-    isNotInList1 (v) {
-      return this.list1.every((k) => v.id !== k.id)
-    },
-    isNotInList2 (v) {
-      return this.list2.every((k) => v.id !== k.id)
-    },
-    deleteEle (ele) {
-      for (const item of this.list1) {
-        if (item.id === ele.id) {
-          const index = this.list1.indexOf(item)
-          this.list1.splice(index, 1)
-          break
-        }
-      }
-      if (this.isNotInList2(ele)) {
-        this.list2.unshift(ele)
-      }
-    },
-    pushEle (ele) {
-      for (const item of this.list2) {
-        if (item.id === ele.id) {
-          const index = this.list2.indexOf(item)
-          this.list2.splice(index, 1)
-          break
-        }
-      }
-      if (this.isNotInList1(ele)) {
-        this.list1.push(ele)
-      }
-    },
+  list1Title: {
+    type: String,
+    default: 'list1',
+  },
+  list2Title: {
+    type: String,
+    default: 'list2',
+  },
+  width1: {
+    type: String,
+    default: '48%',
+  },
+  width2: {
+    type: String,
+    default: '48%',
   },
 })
+
+const isNotInList1 = (v) => {
+  return props.list1.every((k) => v.id !== k.id)
+}
+
+const isNotInList2 = (v) => {
+  return props.list2.every((k) => v.id !== k.id)
+}
+
+const deleteEle = (ele) => {
+  for (const item of props.list1) {
+    if (item.id === ele.id) {
+      const index = props.list1.indexOf(item)
+      props.list1.splice(index, 1)
+      break
+    }
+  }
+  if (isNotInList2(ele)) {
+    props.list2.unshift(ele)
+  }
+}
+
+const pushEle = (ele) => {
+  for (const item of props.list2) {
+    if (item.id === ele.id) {
+      const index = props.list2.indexOf(item)
+      props.list2.splice(index, 1)
+      break
+    }
+  }
+  if (isNotInList1(ele)) {
+    props.list1.push(ele)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
